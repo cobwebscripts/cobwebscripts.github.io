@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h1>Cobweb Scripts Model</h1>
+<p>
+    <a href="index.html">Home</a>
+    <a href="programs.html">Programs</a>
+    <a href="model.html">Model</a>
+    <a href="about.html">About</a>
+</p>
+<p>
+    <img src="model.jpg" width="660" height="510" alt="Stock model">
+</p>
+<p>
+    This desperately needs fleshing out. But to keep it short, this is a regression on SP500 total return. It is inflation adjusted.
+    It is based on the Yahoo Finance ticker ^SP500TR. I used the total return because it helps put a better relationship of the SP500 over the years.
+    Otherwise the years in which dividends drove returns vs stock appreciation becomes misconstrued. You can use this as a proxy measure for the SP500 index.
+    You have to adjust for dividends, but it is very close to what you can expect. How does a person use this? Well you probably should not use it as a timing tool, 
+    but rather as a barometer of the market. If this is crossing over the upper standard deviation, chances are future returns are going to be poorer than average.
+    Why bother using this? Well hopefully once I clean it up, it offers a different perspective by taking into account total returns. Effectively this is another mean reversion 
+    model. Also this is not financial advice yada yada.
+</p>
+<p>
+    Here is a summary of relevant data from the chart. This will show you the predicted values as well as some future values for ^SP500TR. 
+    All of these are for end of month. The predicted values are what the regression line says if it is extended into the future. Predicted in 
+    this case means the "fair/expected value" is what is listed down below.
+    <ul>
+        <li>Current available data point: February 2023 = 8288.79</li>
+        <li>Predicted March 2023 = 8458.73</li>
+        <li>Predicted April 2023 = 8527.29</li>
+        <li>Predicted May 2023 = 8596.41</li>
+        <li>Predicted June 2023 = 8666.08</li>
+        <li>Predicted July 2023 = 8736.32</li>
+        <li>Predicted August 2023 = 8807.12</li>
+        <li>Predicted September 2023 = 8878.51</li>
+        <li>Predicted October 2023 = 8950.47</li>
+        <li>Predicted November 2023 = 9023.01</li>
+        <li>Predicted December 2023 = 9096.14</li>
+    </ul>
+</p>
+<p>
+    Inspired by:
+    <ul>
+        <li>Warren Buffet Total Market Capitlization to GDP indicator</li>
+        <li><a href="https://www.currentmarketvaluation.com/">Current Market Valuation</a></li>
+    </ul>
+</p>
+<p>
+    Sources:
+    <ul>
+        <li><a href="https://finance.yahoo.com/quote/%5ESP500TR/">Yahoo Finance ^SP500TR</a></li>
+        <li><a href="https://beta.bls.gov/dataViewer/view/timeseries/CUUR0000SA0">BLS CPI Data (All items in U.S. city average, all urban consumers, not seasonally adjusted)</a></li>
+    </ul>
+</p>
+</body>
+</html>
