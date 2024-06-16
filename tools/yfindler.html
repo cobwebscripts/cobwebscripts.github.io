@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8">
+        <title>Cobweb Scripts Tools > Yahoo Finance Downloader</title>
+        <link rel="icon" href="../favicon.ico" type="image/x-icon">
+        <link rel="stylesheet" href="../styles/style.css">
+        <script src="../scripts/yFinDler_main.js" type="module"></script>
+    </head>
+    <body>
+        <h1>Cobweb Scripts Tools</h1>
+        <p>
+            <a href="../index.html">Home</a>
+            <a href="../programs.html">Programs</a>
+            <a href="../tools.html">Tools</a>
+            <a href="../about.html">About</a>
+        </p>
+        <h2>Yahoo Finance Downloader</h2>
+        <p>
+            Yahoo Finance provides stock data across thousands of tickers, but access to the data is not consistent. Originally this was a Python script, but I realized I could pinpoint the way I am accessing the data to create a client-side script so that people would not need to worry about installing Python and running code.
+        </p>
+        <p>
+            The script does not currently have a repository of valid tickers in Yahoo Finance, so it may result in failed downloads if an invalid ticker is entered. Unfortunately, Yahoo Finance API was publicly shutdown 2017, but its underpinnings continue to function, which this script targets. If all data is entered correctly, it should initiate a download in a new tab for a csv file containing the desired information. If incorrect data is entered (invalid tickers, dates, etc.), it will simply fail to load. Certain tickers have symbols and you MUST include these symbols. For example, Yahoo Finance lists the SP500 ticker as "^GSPC" in their system, and thus you need to include the caret (^) symbol to download its data.
+        </p>
+        <form>
+            <fieldset>
+                <legend>Yahoo Finance Downloader</legend>
+                <fieldset>
+                    <legend>Ticker</legend>
+                    <label for="ticker">
+                        Yahoo Finance stock ticker:
+                        <input type="text" name="ticker" id="ticker">
+                    </label>
+                </fieldset>
+                <fieldset>
+                    <legend>Date Selection</legend>                    
+                    <label for="dateRangeChoice1">
+                        <input type="radio" id="dateRangeChoice1" name="dateRange" value="all" checked>
+                        All (recommended)
+                    </label>
+                    <label for="dateRangeChoice2">
+                        <input type="radio" id="dateRangeChoice2" name="dateRange" value="specific">
+                        Specify date range
+                    </label>
+                    <label for="startDate">
+                        Start Date:
+                        <input type="date" name="startDate" id="startDate" disabled>
+                    </label>
+                    <label for="endDate">
+                        End Date:
+                        <input type="date" name="endDate" id="endDate" disabled>
+                    </label>
+                </fieldset>
+                <!--
+                    Different time resolutions
+                -->
+                <fieldset>
+                    <legend>Time Resolution</legend>
+                    <label for="timeResolutionChoice1">
+                        <input type="radio" id="timeResolutionChoice1" name="timeResolution" value="day" checked>
+                        Day
+                    </label>
+                    <label for="timeResolutionChoice2">
+                        <input type="radio" id="timeResolutionChoice2" name="timeResolution" value="week">
+                        Week
+                    </label>
+                    <label for="timeResolutionChoice3">
+                        <input type="radio" id="timeResolutionChoice3" name="timeResolution" value="month">
+                        Month
+                    </label>  
+                </fieldset>
+                <button type="button"  id="btnSubmit">Submit</button>
+                <button type="button" id="btnReset">Reset</button>
+            </fieldset>
+        </form>
+    </body>
+</html>

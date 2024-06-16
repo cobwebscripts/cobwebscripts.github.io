@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8">
+        <title>Cobweb Scripts Programs > thinkScript: Exponential Standard Deviation Channel</title>
+        <link rel="icon" href="../favicon.ico" type="image/x-icon">
+    </head>
+    <body>
+        <h1>Cobweb Scripts Programs</h1>
+        <p>
+            <a href="../index.html">Home</a>
+            <a href="../programs.html">Programs</a>
+            <a href="../tools.html">Tools</a>
+            <a href="../about.html">About</a>
+        </p>
+        <h2>thinkScript: Enhanced Standard Deviation Channel</h2>
+        <h3>Basic Info</h3>
+        <p>
+            <a 
+                href="https://github.com/cobwebscripts/EnhancedStdDevCh/archive/refs/heads/main.zip"
+                target="_blank">
+                Download thinkScript for thinkorswim (ZIP, 3KB)
+            </a>
+        </p>
+        <p>
+            <a 
+                href="https://github.com/cobwebscripts/EnhancedStdDevCh"
+                target="_blank">
+                Open Source Page
+            </a>
+        </p>
+        <p>Language(s): thinkScript</p>
+        <p>
+            Description: Thinkorswim has a built-in standard deviation indicator called “StandardDevChannel”. The indicator calculates the standard deviation across the user’s desired time frame and then plots the upper and lower standard deviation around the mean/regression/best fit/trend line. The weakness in the indicator lies with the fact that a direct linear regression is typically a poor representation of stock price movements. My indicator attempts to remedy this by offering the option to calculate the mean line in an exponential manner while still offering the original linear option. This script also adds the option to use a start date alongside the original option of length of time, providing a quality life improvement for the user.
+        </p>
+        <p>
+            The differences between the original indicator and mine are shown in the image below.
+        </p>
+        <figure>
+            <img 
+                src="../images/stddevcomparison_sample.png" 
+                width="800" 
+                height="801" 
+                alt="Original Standard Deviation Channel vs Enhanced Standard Deviation Channel">
+            <figcaption>
+                Original indicator (top), my enhanced version (bottom). <a href="../images/stddevcomparison.png" target="_blank">Enlarged image (PNG, 204KB)</a>
+            </figcaption>
+        </figure>
+        <h3>Set Up</h3>
+        <p>
+            There are multiple ways to import thinkScripts, here is one way  (for reference, see image below):
+        </p>
+        <ol>
+            <li>Open thinkorswim and go to the "Charts" tab.</li>
+            <li>Click on the "Edit studies" button. It will look like a volumetric flask.</li>
+            <li>Click the import button and locate the thinkScript to upload.</li>
+        </ol>
+        <img src="../images/importthinkscript.png" width="958" height="552" alt="thinkScript import reference">
+        <p>
+            If you want an alternative way, you can reference the <a href="https://tlc.thinkorswim.com/center/howToTos/thinkManual/Tools/thinkScript-IDE">thinkManual</a>, under "Managing scripts in thinkScript® IDE", step 4.
+        </p>
+        <h3>Settings</h3>
+        <ul>
+            <li>price = type of price data.</li>
+            <li>deviations = how many standard deviations the upper and lower band should be.</li>
+            <li>full range = overrides the "length" and "start date" parameters and generates the chart for all available data.</li>
+            <li>extend right = continues the graph to the right, if you have any expansion area.
+                <ul>
+                    <li>You can access the expansion area by going to: Charts > Chart Settings > Time axis > Expansion area</li>
+                </ul>
+            </li>
+            <li>regression type = exponential or linear graphing</li>
+            <li>
+                range type = define the data set either by how many bars back (length) or by where to start calculating (start date). Whichever choice is made, the other's setting will be ignored.
+            </li>
+            <li>length = how many bars back.</li>
+            <li>start date = starting data point. The format is YYYYMMDD.
+                <ul>
+                    <li>There is no date validation at this time, so invalid dates result in no graph being drawn. If the graph has a lower resolution time, such as a monthly chart, it will truncate the date to the nearest month rounded down. For example, on a monthly chart, Jan 20, 1970 (19700120), will snap to the Jan 1970.</li>
+                </ul>
+            </li>
+        </ul>
+    </body>
+</html>

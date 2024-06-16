@@ -1,0 +1,24 @@
+/*
+    GENERAL STYLING
+*/
+table {
+    border-collapse: collapse;
+}
+
+table, td, th {
+    border: solid;
+}
+
+/*
+    Make <p> used to display feedback about input appear right next to the form
+*/
+p.feedback {
+    margin: 0em 0em 1em 0em;
+}
+
+/*
+    Make <label> display like a block element so that <input> will be directly below it rather than inline
+*/
+label {
+    display: block;
+}

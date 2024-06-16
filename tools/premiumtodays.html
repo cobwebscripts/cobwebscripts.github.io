@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8">
+        <title>Cobweb Scripts Tools > Option Premium to Days Converter</title>
+        <link rel="icon" href="../favicon.ico" type="image/x-icon">
+        <link rel="stylesheet" href="../styles/style.css">
+        <script src="../scripts/premiumToDays_main.js" defer></script>
+    </head>
+    <body>
+        <h1>Cobweb Scripts Tools</h1>
+        <p>
+            <a href="../index.html">Home</a>
+            <a href="../programs.html">Programs</a>
+            <a href="../tools.html">Tools</a>
+            <a href="../about.html">About</a>
+        </p>
+        <h2>Option Premium to Days Converter</h2>
+        <p>
+            When writing (selling) options to open, one of the struggles retail investors face is when to buy to close. There are articles that attempt to remedy this by recommending set percentages, such as 25-75% of the extrinsic value decayed, but these can leave a bitter taste for larger portfolios due to the absolute value of the remaining extrinsic premium. This problem becomes compounded when directional and/or implied volatility greatly decreases extrinsic value faster than anticipated, leaving the investor to question whether to take the profit or risk staying exposed to capture more of the remaining premium.
+        </p>
+        <p>
+            This script attempts to give an alternative perspective by converting the fluctuations of extrinsic premium to the equivalent days. For example, if you write an option with $2.00 of extrinsic premium with 28 days to expiration, and due to directional changes of the stock, the extrinsic premium of the option is now $1.00 with 25 days to expiration, this calculator will show you how many days to expiration you would have needed to allow theta (time decay) alone to get you to that point.
+        </p>
+        <p>
+            The math behind the conversion is simple and is approximated from the Black-Scholes equation. In the Black-Scholes equation, the square root of time is shown to be approximately proportional to the option price, and thus this relationship can be used to map changes in price to equivalent days to expiration.
+        </p>
+        <form>
+            <fieldset>
+                <legend>Dollars to Time Calculator</legend>
+                <fieldset>
+                    <legend>Mode</legend>
+                    <label for="timeFormChoice1">
+                        <input type="radio" id="timeFormChoice1" name="timeForm" value="dte" checked>
+                        Days to Expiration (DTE)
+                    </label>
+                    <label for="timeFormChoice2">
+                        <input type="radio" id="timeFormChoice2" name="timeForm" value="specific">
+                        Dates
+                    </label>
+                </fieldset>
+                <!--
+                    Two separate parts to represent the different modes
+                -->
+                <fieldset id="form1Days">
+                    <legend>DTE Mode</legend>
+
+                    <label for="startDTE">
+                        Days to expiration when option was sold:                        
+                    </label>
+                    <input type="text" name="startDTE" id="startDTE" class="inputText">
+                    <p id="startDTEFeedback" class="feedback">--</p>
+
+                    <label for="startExPrem">
+                        Extrinsic premium, in dollars, when option was sold:
+                    </label>
+                    <input type="text" name="startExPrem" id="startExPrem" class="inputText">
+                    <p id="startExPremFeedback" class="feedback">--</p>
+
+                    <label for="currentDTE">
+                        Current days to expiration of option:
+                    </label>
+                    <input type="text" name="currentDTE" id="currentDTE" class="inputText">
+                    <p id="currentDTEFeedback" class="feedback">--</p>
+
+                    <label for="currentExPrem">
+                        Current extrinsic premium, in dollars:
+                    </label>
+                    <input type="text" name="currentExPrem" id="currentExPrem" class="inputText">
+                    <p id="currentExPremFeedback" class="feedback">--</p>
+                </fieldset>
+    
+                <fieldset id="form2Dates" hidden>
+                    <legend>Dates Mode</legend>
+
+                    <label for="expirDate">
+                        Expiration date of option:
+                    </label>
+                    <input type="date" name="expirDate" id="expirDate" class="inputText">
+                    <p id="expirDateFeedback" class="feedback">--</p>
+                    
+                    <label for="startDate">
+                        Date when option was sold:
+                    </label>
+                    <input type="date" name="startDate" id="startDate" class="inputText">
+                    <p id="startDateFeedback" class="feedback">--</p>
+                    
+                    <label for="startExPrem2">
+                        Extrinsic premium, in dollars, when option was sold:
+                    </label>
+                    <input type="text" name="startExPrem2" id="startExPrem2" class="inputText">
+                    <p id="startExPrem2Feedback" class="feedback">--</p>
+                    
+                    <label for="currentDate">
+                        Current date:
+                    </label>
+                    <input type="date" name="currentDate" id="currentDate" class="inputText">
+                    <p id="currentDateFeedback" class="feedback">--</p>
+                    
+                    <label for="currentExPrem2">
+                        Current extrinsic premium, in dollars:
+                    </label>
+                    <input type="text" name="currentExPrem2" id="currentExPrem2" class="inputText">
+                    <p id="currentExPrem2Feedback" class="feedback">--</p>                    
+                </fieldset>    
+                <button type="button"  id="btnSubmit" disabled>Submit</button>
+                <button type="button" id="btnReset">Reset</button>
+                <p id="calcSentence">--</p>
+            </fieldset>            
+        </form>
+    </body>
+</html>
