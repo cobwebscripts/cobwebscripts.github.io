@@ -1,7 +1,7 @@
 /* 
     Data format as follows:
     [^SP500TR PRICE, CPI]
-    Current date range: 01/1988 to 06/2024
+    Current date range: 01/1988 to 08/2024
 */
 export const data = [
     [257.47,115.7],
@@ -441,5 +441,7 @@ export const data = [
     [11418.03,312.332],
     [10951.66,313.548],
     [11494.7,314.069],
-    [11907.15,314.175]
+    [11907.15,314.175],
+    [12052.09,314.54],
+    [12344.43,314.796]
 ]
