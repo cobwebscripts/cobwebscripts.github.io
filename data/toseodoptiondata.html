@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8">
+        <title>Cobweb Scripts Data > thinkorswim End of Day Option Data</title>
+        <link rel="icon" href="./favicon.ico" type="image/x-icon">
+    </head>
+    <body>
+        <h1>Cobweb Scripts Data</h1>
+        <p>
+            <a href="../index.html">Home</a>
+            <a href="../programs.html">Programs</a>
+            <a href="../tools.html">Tools</a>
+            <a href="../data.html">Data</a>
+            <a href="../about.html">About</a>
+        </p>
+
+        <h2>thinkorswim End of Day Option Data</h2>
+
+        <h3>Background</h3>
+        <p>
+            FREE end of day option data is hard to come by. 
+            In a world where stock data is given out like candy, option data remains hidden 
+            behind paywalls. 
+            Before I started this project, I scoured the internet to see if anyone had already 
+            compiled free option data. 
+            While I did find some (they are listed at the bottom of the page under Alternative 
+            Sources), I found that even the best sources were limited to recent times. 
+            There was only one place that retail traders could get option data that stretched to 
+            over 20 years ago: thinkorswim. 
+        </p>
+        <p>
+            There was, however, one problem: data can only be exported one day at a time. 
+            Going back to the internet, people on subreddits had come to the same conclusion: the 
+            process was too slow, with some posts talking about how it took days to export one 
+            ticker’s end of day option data. 
+            Despite that, I attempted the process myself. 
+            I tried reading network data, but from what I could tell, the data was encrypted 
+            until it reached the thinkorswim application. 
+            I only have a basic, conceptual idea of network security, so I did not find it 
+            feasible to figure out how to perform a man-in-the-middle interception to easily 
+            grab the data. 
+            This left me with automating the download process through thinkorswim itself. 
+            At a cursory glance, you would assume an auto clicker or a simple macro would be 
+            enough to export the data. 
+            This turned out not to be the case. 
+            There are so many caveats and exceptions regarding thinkorswim’s interface that it 
+            effectively acts as a deterrent against this sort of GUI automation. 
+            Eventually, after several months, I created a proof-of-concept that was robust enough 
+            to export data, which leads us to here.
+        </p>
+
+        <h3>Broker Data Weakness</h3>
+        <p>
+            When talking about option data, a point comes up about the quality and thinkorswim 
+            data is no exception. 
+            For groups, such as hedge funds, looking at option data is related to seeking alpha. 
+            They are attempting to use the data to enhance a model or build a new model to take 
+            advantage of what they believe to be unrealized value. 
+            But why is broker data considered low quality for this purpose? 
+            Well data must be usable and representative of real-life circumstances. 
+            End of day option data from brokers usually represent the final snapshot of the last 
+            trades before the closing bell; however, data for modeling option prices may need to 
+            be some time before the closing bell to represent real life liquidity and prices. 
+            On top of that, brokers do not particularly care to capture the data itself as 
+            accurately as possible. 
+            You may have data that has not been properly adjusted, data that has missing trades, 
+            data that may just be flat out inaccurate, or dirty and unprocessed. 
+        </p>
+        <p>
+            Despite all these weaknesses, I believe retail traders still deserve a chance to 
+            glance over something before opening their wallets. 
+            Even if it is not the best, at least they have an opportunity to peek before taking the next step. 
+        </p>
+
+        <h3>thinkorswim Specific Weaknesses</h3>
+        <ul>
+            <li>
+                thinkorswim data seems one day behind.
+                <ul>
+                    <li>
+                        Example 1, in META: 
+                        If the stock closed at $28.19 [1] on May 30, 2012 then thinkorswim has 
+                        that data in the May 31, 2012 csv file.
+                    </li>
+                    <li>
+                        Example 2, in META:
+                        The ticker change for META (FB to META) occurred before market open on 
+                        June 9, 2022 is reflected in the June 10, 2022 csv file.
+                    </li>
+                </ul>
+            </li>
+            <li>
+                Stock splits are not applied retroactively. 
+                <ul>
+                    <li>
+                        Example 1, in NVDA:
+                        They have had 4 stock splits since January 2, 2003 (2x, 1.5x, 4x, 10x) 
+                        for a total of 120x split [2]. 
+                        If cross referenced with Yahoo Finance, the data as of October 7, 2024, 
+                        says the price at close on January 2, 2003  was $0.10 [3]. 
+                        However looking at the csv file for January 3, 2003 (remember the 
+                        problem about a day behind mentioned above), the price is listed as 
+                        $12.31.
+                        If you do 12.31 / 120 = $0.10258 ~ $0.10.
+                        This matches Yahoo Finance’s data. 
+                        Thus in 2003, the price really was $12.31, but with the splits 
+                        retroactively applied to it, the price becomes $0.10.
+                    </li>
+                </ul>
+            </li>
+        </ul>
+        <p>Sources:</p>
+        <ol>
+            <li>
+                <a
+                    href="https://finance.yahoo.com/quote/META/history/?period1=1338336000&period2=1338422400">
+                    Yahoo Finance - META May 30, 2012
+                </a>
+            </li>
+            <li>
+                <a href="https://companiesmarketcap.com/nvidia/stock-splits/">
+                    companiesmarketcap.com - NVDA
+                </a>
+            </li>
+            <li>
+                <a 
+                    href="https://finance.yahoo.com/quote/NVDA/history/?period1=1041465600&period2=1041552000">
+                    Yahoo Finance - NVDA January 2, 2003
+                </a>
+            </li>
+        </ol>
+
+        <h3>thinkorswim Data Format and Specification</h3>
+        <p>
+            I did not include anything thinkorswim considers a holiday or weekend. 
+            In other words, all data provided here is considered a trading day, by thinkorswim’s 
+            standards.
+        </p>
+        <p>
+            The follow data was extracted in the csv file (they may not be filled in every file): 
+        </p>
+        <ul>
+            <li>Stock LAST</li>
+            <li>Stock NET CHANGE</li>
+            <li>Stock VOLUME</li>
+            <li>Stock OPEN</li>
+            <li>Stock HIGH</li>
+            <li>Stock LOW</li>
+            <li>Option EXPIRATION DATE</li>
+            <li>Option DAYS-TO-EXPIRATION</li>
+            <li>Option STRIKE</li>
+            <li>Option BID</li>
+            <li>Option ASK</li>
+            <li>Option LAST (LAST X)</li>
+            <li>Option VOLUME</li>
+            <li>Option OPEN INTEREST</li>
+            <li>Option DELTA</li>
+            <li>Option GAMMA</li>
+            <li>Option VEGA</li>
+            <li>Option THETA</li>
+            <li>Option EXTRINSIC</li>
+            <li>Option RHO</li>
+            <li>Option MARK</li>
+        </ul>
+
+        <h3>Feedback</h3>
+        <p>
+            Please feel free to get in touch with me using one of the accounts on the 
+            <a href="../about.html">About</a> page. I am open to requests!
+        </p>
+
+        <h3>Dataset</h3>
+        <p>
+            Links to the data, the range exported (format of [MM/DD/YYYY]), and notes about the 
+            data are available below. 
+        </p>
+
+        <h4>Indices</h4>
+        <ul>
+            <li>
+                <a 
+                    href="https://mega.nz/file/7N4nxKxa#1AuaVJdtaAq7K6zr_MgsMtPLGZA_o_FlXbzIh762Vkk">
+                    SPX (ZIP, 1.19GB)
+                </a>
+                <ul>
+                    <li>Range: [01/03/2003 - 06/28/2024]</li>
+                </ul>
+            </li>
+            <li>
+                <a 
+                    href="https://mega.nz/file/2cZ3xTpS#3-tTMgd8lNFZCB26HrHJzWPvdr4aur8OSjVZlx97iJA">
+                    VIX (ZIP, 46.6MB)
+                </a>
+                <ul>
+                    <li>Range: [02/28/2006 - 06/28/2024]</li>
+                    <li>
+                        Not included because no option chain: 
+                        [12/04/2015], [01/19/2016], [04/18/2016], [04/25/2016], [07/11/2016], 
+                        [08/15/2016], [06/05/2017], [09/28/2017], [05/14/2018], [05/21/2018], 
+                        [05/29/2018], [07/16/2018], [08/27/2018], [10/12/2018], [10/15/2018], 
+                        [12/31/2018]
+                    </li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4>ETFs</h4>
+        <ul>
+            <li>
+                <a 
+                    href="https://mega.nz/file/zd4nCZaT#OfvKZXYdGhtyDX4v9h6rYY9cJ2CpxuNmxrCgycMCb1g">
+                    IWM (ZIP, 365MB)
+                </a>
+                <ul>
+                    <li>Range: [01/03/2003 - 06/28/2024]</li>
+                    <li>
+                        Not included because no option chain: 
+                        [12/04/2015]
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a 
+                    href="https://mega.nz/file/iJIxUbbS#SENUk4cF1-8-Iv90cHbfKoYQ21zjSZS12ZuOGBsihEE">
+                    QQQ (ZIP, 382MB)
+                </a>
+                <ul>
+                    <li>Range: [01/03/2003 - 06/28/2024]</li>
+                    <li>
+                        Most of this range is broken but still included: 
+                        [12/01/2004 - 03/23/2011]
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a 
+                    href="https://mega.nz/file/SEJU0QAT#a0zdj7pwbk2w5XheHYEP9U5sLfejDLZlBERDIy7bKsQ">
+                    SPY (ZIP, 683.7MB)
+                </a>
+                <ul>
+                    <li>Range: [01/11/2005 - 06/28/2024]</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4>Stocks</h4>
+        <ul>
+            <li>
+                <a 
+                    href="https://mega.nz/file/DMgQBZLA#PfNJ8y6IbIsPyjWUsLT0YkA3IWpRHVpkQP9dNlfrH4A">
+                    AAPL (ZIP, 222.9MB)
+                </a>
+                <ul>
+                    <li>Range: [01/03/2003 - 06/28/2024]</li>
+                </ul>
+            </li>
+            <li>
+                <a 
+                    href="https://mega.nz/file/SQQxSZIa#9pdbkHcs9XvnO-bOHMm3eGousz6MpSN_lXBqFByMRsU">
+                    AMD (ZIP, 92.2MB)
+                </a>
+                <ul>
+                    <li>Range: [01/03/2003 - 06/28/2024]</li>
+                </ul>
+            </li>
+            <li>
+                <a 
+                    href="https://mega.nz/file/PQhi3I4K#KsOOBZGWOG4JOrlz2rwgiC5PI1as3KlKe5oDO6mUBpc">
+                    AMZN (ZIP, 375.6MB)
+                </a>
+                <ul>
+                    <li>Range: [01/03/2003 - 06/28/2024]</li>
+                </ul>
+            </li>
+            <li>
+                <a 
+                    href="https://mega.nz/file/DEBmTAzR#B3ZOMT6ZsuS5xqF2aZTzlr7NLS3yUd1LjhgBLgIs-F8">
+                    GME (ZIP, 90.6MB)
+                </a>
+                <ul>
+                    <li>Range: [01/03/2003 - 06/28/2024]</li>
+                    <li>
+                        Missing: 
+                        [06/10/2019] (Stuck loading forever)
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a 
+                    href="https://mega.nz/file/yVoQkK6T#DTixo7BShneKKcT5cn-3XnKXAh553lZTyWDuYRNk04o">
+                    GOOG (ZIP, 315MB)
+                </a>
+                /
+                <a 
+                    href="https://mega.nz/file/eAplRDjB#1ixTFQQlwcGg1GYWVNcVD9L3XxSaKvCepGSTrIJo6u8">
+                    GOOGL (ZIP, 256.2MB)
+                </a>
+                <ul>
+                    <li>Range (GOOG): [09/01/2004 - 06/28/2024]</li>
+                    <li>Range (GOOGL): [04/04/2014 - 06/28/2024]</li>
+                    <li>
+                        Notes:
+                        <ul>
+                            <li>
+                                GOOG was the original class A stock. 
+                                In 2014, Google decided to do a special type of stock split that 
+                                split the stock into GOOG and GOOGL. 
+                                GOOG was changed to class C and GOOGL became the class A stock. 
+                                The record date was on March 27, 2014, payment date on April 2, 
+                                2014, and the class C ticker appeared on April 3, 2014 [1] – [4]. 
+                            </li>
+                            <li>
+                                If you want to create a folder specifically following class A 
+                                stock use GOOG [09/01/2004 - 04/03/2014] and GOOGL 
+                                [04/04/2014 - PRESENT].
+                            </li>
+                            <li>
+                                If you want to create a folder specifically following class C 
+                                stock use GOOG [04/04/2014 - PRESENT]. 
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        Sources:
+                        <ol>
+                            <li>
+                                <a 
+                                    href="https://www.sec.gov/Archives/edgar/data/1288776/000128877614000065/0001288776-14-000065-index.htm">
+                                    SEC – Google 10-Q 2014-06-30 page 27
+                                </a>
+                            </li>
+                            <li>
+                                <a 
+                                    href="https://brokerchooser.com/education/stocks/how-to-buy-google-shares/google-stock-splits">
+                                    brokerchooser.com – Google stock splits
+                                </a>
+                            </li>
+                            <li>
+                                <a 
+                                    href="https://abc.xyz/assets/investor/static/pdf/2014_form8937.pdf">
+                                    Google 8937 Form 2014
+                                </a>
+                            </li>
+                            <li>
+                                <a 
+                                    href="https://www.sec.gov/Archives/edgar/data/1288776/000128877615000008/goog2014123110-k.htm">
+                                    SEC – Google 10-K 2014
+                                </a>
+                            </li>
+                        </ol>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a 
+                    href="https://mega.nz/file/PJBTVByb#23FeP4JIc74SmCgQVnXDDjwiqyzYhdjyCI0ur9x3Srg">
+                    INTC (ZIP, 82.7MB)
+                </a>
+                <ul>
+                    <li>Range: [01/03/2003 - 06/28/2024]</li>
+                </ul>
+            </li>
+            <li>
+                <a 
+                    href="https://mega.nz/file/HMYRkKAA#nsSU8V19cYer7vjzzn9zCg21ppIu3eFUnE4QlwsQTiM">
+                    META (prev. FB) (ZIP, 154.3MB)
+                </a>
+                <ul>
+                    <li>Range (FB): [05/30/2012 - 06/09/2022]</li>
+                    <li>Range (META): [06/10/2022 - 06/28/2024]</li>
+                    <li>
+                        Notes:
+                        <ul>
+                            <li>
+                                FB to META occured prior to market open June 9, 2022 [1].
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        Sources:
+                        <ol>
+                            <li>
+                                <a 
+                                    href="https://investor.fb.com/investor-news/press-release-details/2022/Meta-Platforms-Inc.-to-Change-Ticker-Symbol-to-META-on-June-9/default.aspx">
+                                    Meta Investor Relations
+                                </a>
+                            </li>
+                        </ol>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a 
+                    href="https://mega.nz/file/PAxxDIga#_bPkj12uVOZCFttxaKmXUM5Tf-xqed4gcy6k9KnAsxs">
+                    MSFT (ZIP, 141.5MB)
+                </a>
+                <ul>
+                    <li>Range: [01/03/2003 - 06/28/2024]</li>
+                </ul>
+            </li>
+            <li>
+                <a 
+                    href="https://mega.nz/file/uRB12aIa#rbJADGoc2LJl0-ohdX8h_WKWFx-XKe85JTuxo9tBtIU">
+                    NVDA (ZIP, 193.9MB)
+                </a>
+                <ul>
+                    <li>Range: [01/03/2003 - 06/28/2024]</li>
+                </ul>
+            </li>
+            <li>
+                <a 
+                    href="https://mega.nz/file/bdJnAJZK#rP7OSpLu22OnWbmraY3mSgpOy2L0I8h2ePT_WwfCJaE">
+                    RDDT (ZIP, 2MB)
+                </a>
+                <ul>
+                    <li>Range: [03/25/2024 - 06/28/2024]</li>
+                </ul>
+            </li>
+            <li>
+                <a 
+                    href="https://mega.nz/file/jUYg3CgJ#FVJkll_-3hXrTAqeSpGRXa0U6Dx9TF8YR4Zd-iAaZXU">
+                    TSLA (ZIP, 300.7MB)
+                </a>
+                <ul>
+                    <li>Range: [07/09/2010 - 06/28/2024]</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3>Alternative Sources</h3>
+        <ul>
+            <li>
+                <a 
+                    href="https://www.dolthub.com/repositories/post-no-preference/options">
+                    dolthub
+                </a>
+            </li>
+        </ul>
+    </body>
+</html>
