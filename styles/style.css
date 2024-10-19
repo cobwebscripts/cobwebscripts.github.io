@@ -1,6 +1,30 @@
 /*
     GENERAL STYLING
 */
+
+/*
+    Inspired by:
+    https://justinjackson.ca/words.html
+*/
+body {
+	font-size: 1.1em;
+	line-height: 1.5em;
+	margin: 2em auto;
+	max-width: 35em;
+    background-color: #090909;
+    color: #999999;
+}
+
+a:link {
+    color: #3399ff;
+}
+
+/* 
+    !!!!! FOR ALL CSS BELOW !!!!!
+    MIGHT NEED TO BE CHANGED INTO SEPARATE SPECIALIZED CSS
+*/
+
+
 table {
     border-collapse: collapse;
 }
