@@ -3,6 +3,8 @@
     download of the Yahoo Finance data in a new window/tab can be initiated.
 */
 
+import {YahooFinanceAPI} from "./YahooFinanceAPI.js";
+
 // CONSTANTS
 /*
     The end goal it to convert to epoch time in SECONDS.
@@ -33,7 +35,7 @@ dateRangeChoice2.addEventListener("click", enableDateInputs);
 dateRangeChoice1.addEventListener("click", disableDateInputs);
 
 // Submit and open a new tab
-btnSubmit.addEventListener("click", openURL);
+btnSubmit.addEventListener("click", main);
 
 // Reset the fields back to default
 btnReset.addEventListener("click", resetPage);
@@ -145,4 +147,50 @@ function resetPage()
     disableDateInputs();
 
     timeResolutionChoice1.checked = true;
+}
+
+
+
+async function main()
+{
+    // Get the time interval
+    let interval;
+    // Daily
+    if (timeResolutionChoice1.checked)
+        interval = "1d";
+    
+    // Weekly
+    else if (timeResolutionChoice2.checked)
+        interval = "1wk";
+
+    // Monthly
+    else if (timeResolutionChoice3.checked)
+        interval = "1mo";
+
+
+    let yahoo;
+    if (startDate.value === "")
+        yahoo = new YahooFinanceAPI(ticker.value, interval);
+    else
+        yahoo = new YahooFinanceAPI(ticker.value, interval, startDate.value, endDate.value);
+    
+
+    const raw = await yahoo.retrieveJson();
+
+    const str = yahoo.compileData(raw).join("\n");
+
+    // Experimental
+    const blob = new Blob([str], {type: "text/html"});
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.setAttribute("hidden", "");
+    a.setAttribute("href", url);
+    a.setAttribute("download", ticker.value + ".csv");
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+
+    
+
 }
