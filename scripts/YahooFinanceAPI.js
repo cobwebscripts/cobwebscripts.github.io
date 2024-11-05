@@ -16,6 +16,13 @@
     Sources:
     [1] https://gist.github.com/jimmywarting/ac1be6ea0297c16c477e17f8fbe51347
     ~~~~~
+
+    ~~~~~
+    TODO
+    ~~~~~
+    [*] Correct timing in compileData() so it mirrors Yahoo Finance page.
+        This is an issue for the 1wk and 1mo resolutions.
+    ~~~~~
 */
 
 class YahooFinanceAPI
@@ -23,6 +30,12 @@ class YahooFinanceAPI
 
 
     // Class Field Declarations
+    /*
+        @field startDate start date of desired range as a string in YYYY-MM-DD form
+        @field endDate end date of desired range as a string in YYYY-MM-DD form
+        @ticker ticker that corresponds to Yahoo Finance ticker
+        @timeResolution resolution represented as "1d", "1wk", or "1mo"
+    */
     startDate;
     endDate;
     ticker;
@@ -38,6 +51,8 @@ class YahooFinanceAPI
 
     /*
         Asynchronously fetches and returns JSON from URL.
+
+        @return raw stock data in JSON form
     */
     async retrieveJson()
     {
@@ -48,6 +63,11 @@ class YahooFinanceAPI
         return stockJson;
     }
 
+    /*
+        Combines CORS proxy with URL created with class fields to create target URL.
+
+        @return target url
+    */
     #createUrl()
     {
         // I set the range to 1000 years so capture all data
@@ -60,6 +80,9 @@ class YahooFinanceAPI
 
     /*
         Convert seconds since epoch to string date YYYY-MM-DD.
+
+        @param timeStamp time since epoch in seconds
+        @return date as a string in YYYY-MM-DD form
     */
     #secondsToDate(timestamp)
     {
@@ -75,41 +98,89 @@ class YahooFinanceAPI
         return stringDate;
     }
 
+    /*
+        Parses the timestamp array from the stock JSON.
+
+        @param stockJson JSON of stock data
+        @return array of timestamps
+    */
     #getTimestamps(stockJson)
     {
         return stockJson.chart.result[0].timestamp;
     }
 
+    /*
+        Parses the open array from the stock JSON.
+
+        @param stockJson JSON of stock data
+        @return array of stock open prices
+    */
     #getOpens(stockJson)
     {
         return stockJson.chart.result[0].indicators.quote[0].open;
     }
 
+    /*
+        Parses the high array from the stock JSON.
+
+        @param stockJson JSON of stock data
+        @return array of stock high prices
+    */
     #getHighs(stockJson)
     {
         return stockJson.chart.result[0].indicators.quote[0].high;
     }
 
+    /*
+        Parses the low array from the stock JSON.
+
+        @param stockJson JSON of stock data
+        @return array of stock low prices
+    */
     #getLows(stockJson)
     {
         return stockJson.chart.result[0].indicators.quote[0].low;
     }
 
+    /*
+        Parses the close array from the stock JSON.
+
+        @param stockJson JSON of stock data
+        @return array of stock close prices
+    */
     #getCloses(stockJson)
     {
         return stockJson.chart.result[0].indicators.quote[0].close;
     }
 
+    /*
+        Parses the volume array from the stock JSON.
+
+        @param stockJson JSON of stock data
+        @return array of stock volume
+    */
     #getVolumes(stockJson)
     {
         return stockJson.chart.result[0].indicators.quote[0].volume;
     }
 
+    /*
+        Parses the adjusted close array from the stock JSON.
+
+        @param stockJSON JSON of stock data
+        @return array of stock adjusted closed prices
+    */
     #getAdjCloses(stockJson)
     {
         return stockJson.chart.result[0].indicators.adjclose[0].adjclose;
     }
 
+    /*
+        Parses the dividend array from the stock JSON.
+
+        @param stockJSON JSON of stock data
+        @return array of stock dividends
+    */
     #getDividends(stockJson)
     {
         let dividends;
@@ -137,6 +208,12 @@ class YahooFinanceAPI
         return output;
     }
 
+    /*
+        Parses the splits array from the stock JSON.
+
+        @param stockJSON JSON of stock data
+        @return array of stock splits
+    */
     #getSplits(stockJson)
     {
         let splits;
@@ -159,6 +236,12 @@ class YahooFinanceAPI
         return output;
     }
 
+    /*
+        Compiles all data into a format easily converted to CSV form.
+
+        @param stockJSON JSON of stock data
+        @return compiled data with headers
+    */
     compileData(stockJson)
     {
         const timestamps = this.#getTimestamps(stockJson);
@@ -218,6 +301,12 @@ class YahooFinanceAPI
         return compiledData;
     }
 
+    /*
+        Adds headers to the data.
+
+        @param data CSV ready data without headers
+        @return CSV ready data with headers
+    */
     #addHeaders(data)
     {
         const headers = [
@@ -235,8 +324,6 @@ class YahooFinanceAPI
         return data;
     }
 
-
 }
-
 
 export {YahooFinanceAPI};

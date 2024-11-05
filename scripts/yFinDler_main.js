@@ -1,22 +1,15 @@
 /*
     This script takes the ticker and date information, and converts and combines it so that a 
-    download of the Yahoo Finance data in a new window/tab can be initiated.
+    download of the Yahoo Finance data as a CSV can be initiated.
 */
 
 import {YahooFinanceAPI} from "./YahooFinanceAPI.js";
 
+/////
 // CONSTANTS
-/*
-    The end goal it to convert to epoch time in SECONDS.
-    So we skip conversion and make the start a large negative value in epoch time.
-    This -9999999999  seconds translates to Feb 10, 1653.
-*/
-const OLDEST = -9999999999;
+/////
+// Place constants here
 
-/*
-    Date.now() returns current number of MILLSECONDS since the epoch.
-*/
-const NOW = Math.ceil(Date.now() / 1000);
 
 // Declare variables to attach HTML elements
 const ticker = document.querySelector("#ticker");
@@ -35,7 +28,7 @@ dateRangeChoice2.addEventListener("click", enableDateInputs);
 dateRangeChoice1.addEventListener("click", disableDateInputs);
 
 // Submit and open a new tab
-btnSubmit.addEventListener("click", main);
+btnSubmit.addEventListener("click", downloadCSV);
 
 // Reset the fields back to default
 btnReset.addEventListener("click", resetPage);
@@ -67,74 +60,6 @@ function disableDateInputs()
 }
 
 /*
-    Using form data, calculates the following parameters:
-    [*] Ticker
-    [*] Start Period
-    [*] End Period
-    [*] Time interval
-    Using this, a URL is generated that can be used to retrieve Yahoo Finance's data.
-*/
-function generateURL()
-{
-    // Get the start and end periods for the URL
-    let startPeriod;
-    let endPeriod;
-    if (dateRangeChoice2.checked)
-    {
-        startPeriod = htmlDateToEpochSeconds(startDate);
-        // End period requires a 1 day (86400 second) adjustment
-        endPeriod = htmlDateToEpochSeconds(endDate) + 86400;
-    }
-    else
-    {
-        startPeriod = OLDEST;
-        endPeriod = NOW;
-    }
-
-    // Get the time interval
-    let interval;
-    // Daily
-    if (timeResolutionChoice1.checked)
-        interval = "1d";
-    
-    // Weekly
-    else if (timeResolutionChoice2.checked)
-        interval = "1wk";
-
-    // Monthly
-    else if (timeResolutionChoice3.checked)
-        interval = "1mo";
-
-    const url = "https://query1.finance.yahoo.com/v7/finance/download/" + ticker.value + 
-        "?period1=" + startPeriod + "&period2=" + endPeriod + "&interval=" + interval +
-        "&events=history&includeAdjustedClose=true";
-
-    return url;
-}
-
-/*
-    Converts value of <input type="date"> into seconds since UNIX epoch. 
-*/
-function htmlDateToEpochSeconds(date)
-{
-    // Date value regardless of browser presentation is always YYYY-MM-DD
-    const dateArr = date.value.split("-");
-    //Months are zero indexed
-    const dateObj = new Date(dateArr[0], (dateArr[1] - 1), dateArr[2]);
-
-    // getTime() returns in MILLISECONDS since epoch so need to divide by 1000 for SECONDS
-    return Math.ceil(dateObj.getTime() / 1000);
-}
-
-/*
-    Opens the Yahoo Finanace query created in a new tab to initiate the download.
-*/
-function openURL()
-{
-    window.open(generateURL(), "_blank");
-}
-
-/*
     Resets all input elements to blank and all checked boxes backed to original state defined in 
     yfindler.html.
 */
@@ -149,9 +74,11 @@ function resetPage()
     timeResolutionChoice1.checked = true;
 }
 
-
-
-async function main()
+/*
+    Asynchronously uses the information entered to create a query and return the desired data as 
+    a CSV.
+*/
+async function downloadCSV()
 {
     // Get the time interval
     let interval;
@@ -167,7 +94,7 @@ async function main()
     else if (timeResolutionChoice3.checked)
         interval = "1mo";
 
-
+    // Check if we are doing All data or a desired range
     let yahoo;
     if (startDate.value === "")
         yahoo = new YahooFinanceAPI(ticker.value, interval);
@@ -177,9 +104,11 @@ async function main()
 
     const raw = await yahoo.retrieveJson();
 
+    // Convert data to its CSV form
     const str = yahoo.compileData(raw).join("\n");
 
-    // Experimental
+    // Derived from: 
+    // https://www.youtube.com/watch?v=eicLNabvZN8
     const blob = new Blob([str], {type: "text/html"});
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -190,7 +119,4 @@ async function main()
     a.click();
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
-
-    
-
 }
