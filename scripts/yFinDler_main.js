@@ -3,6 +3,13 @@
     download of the Yahoo Finance data as a CSV can be initiated.
 */
 
+/*
+    ~~~~~
+    TODO
+    ~~~~~
+    [*] Checkbox to add/remove dividends and stock splits from data
+*/
+
 import {YahooFinanceAPI} from "./YahooFinanceAPI.js";
 
 /////
