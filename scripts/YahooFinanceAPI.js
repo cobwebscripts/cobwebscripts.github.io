@@ -22,6 +22,7 @@
     ~~~~~
     [*] Correct timing in compileData() so it mirrors Yahoo Finance page.
         This is an issue for the 1wk and 1mo resolutions.
+    [*] Catch errors from Yahoo Finance and throw them up.
     ~~~~~
 */
 
