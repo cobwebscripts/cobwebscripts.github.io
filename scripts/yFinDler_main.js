@@ -7,7 +7,7 @@
     ~~~~~
     TODO
     ~~~~~
-    [*] Checkbox to add/remove dividends and stock splits from data
+    [*] Add bulk downloader
 */
 
 import {YahooFinanceAPI} from "./YahooFinanceAPI.js";
@@ -24,6 +24,8 @@ const dateRangeChoice1 = document.querySelector("#dateRangeChoice1");
 const dateRangeChoice2 = document.querySelector("#dateRangeChoice2");
 const startDate = document.querySelector("#startDate");
 const endDate = document.querySelector("#endDate");
+const dividendsCheckbox = document.querySelector("#dividendsCheckbox");
+const stockSplitsCheckbox = document.querySelector("#stockSplitsCheckbox");
 const timeResolutionChoice1 = document.querySelector("#timeResolutionChoice1");
 const timeResolutionChoice2 = document.querySelector("#timeResolutionChoice2");
 const timeResolutionChoice3 = document.querySelector("#timeResolutionChoice3");
@@ -78,6 +80,9 @@ function resetPage()
     // Might as well use disableDateInputs() since it resets to desired initial state
     disableDateInputs();
 
+    dividendsCheckbox.checked = true;
+    stockSplitsCheckbox.checked = true;
+
     timeResolutionChoice1.checked = true;
 }
 
@@ -103,10 +108,13 @@ async function downloadCSV()
 
     // Check if we are doing All data or a desired range
     let yahoo;
-    if (startDate.value === "")
-        yahoo = new YahooFinanceAPI(ticker.value, interval);
+    if (startDate.value === "" || endDate.value === "")
+        yahoo = new YahooFinanceAPI(ticker.value, interval, 
+                                    dividendsCheckbox.checked, stockSplitsCheckbox.checked);
     else
-        yahoo = new YahooFinanceAPI(ticker.value, interval, startDate.value, endDate.value);
+        yahoo = new YahooFinanceAPI(ticker.value, interval, 
+                                    dividendsCheckbox.checked, stockSplitsCheckbox.checked, 
+                                    startDate.value, endDate.value);
     
 
     const raw = await yahoo.retrieveJson();

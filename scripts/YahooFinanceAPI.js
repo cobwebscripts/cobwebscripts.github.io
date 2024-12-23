@@ -23,9 +23,42 @@
     [*] Correct timing in compileData() so it mirrors Yahoo Finance page.
         This is an issue for the 1wk and 1mo resolutions.
     [*] Catch errors from Yahoo Finance and throw them up.
+    [*] Refactor for better separation of concerns.
+    [*] combineData() has an issue on 1wk and 1mo resolutions.
+        Even though they are the same date, they get separated because the milliseconds 
+        are different.
+    [*] Maybe change compileData() and compiledData to 
+        prepareData() and preparedData, respectively.
     ~~~~~
 */
 
+/*
+    ~~~~~
+    SPECIFICATIONS
+    ~~~~~
+    A standardized format with the data helps with data movement.
+    To parse the data we can use a hashmap.
+    Key = Timestamps (Date)
+    Value = Array
+    The array will hold 6 guaranteed slots in this order:
+    [1] Open
+    [2] High
+    [3] Low
+    [4] Close
+    [5] Adj Close
+    [6] Volume
+
+    Two optional slots can be added in this order:
+    [7] Dividends
+    [8] Stock splits
+
+    However, because both dividends and stock splits are optional, you could have 
+    stock splits in the place of dividends if dividends are not selected.
+
+    To accomplish this, we can have always build the array with the first 6 slots first,
+    even if it is all empty.
+    Then push dividends (if selected) followed by stock splits (if selected).
+*/
 class YahooFinanceAPI
 {
 
@@ -41,13 +74,19 @@ class YahooFinanceAPI
     endDate;
     ticker;
     timeResolution;
+    includeDividends;
+    includeStockSplits;
 
-    constructor(ticker, timeResolution, startDate = null, endDate = null)
+    constructor(ticker, timeResolution, 
+        includeDividends, includeStockSplits,
+        startDate = null, endDate = null)
     {
         this.ticker = ticker;
         this.timeResolution = timeResolution;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.includeDividends = includeDividends;
+        this.includeStockSplits = includeStockSplits;
     }
 
     /*
@@ -177,6 +216,41 @@ class YahooFinanceAPI
     }
 
     /*
+        Creates a Map object with timestamp (in seconds since epoch) as key 
+        and an array of stock data as the value.
+
+        @param stockJSON JSON of stock data
+        @return Map object of stock data
+    */
+    #createStandardDataHashMap(stockJson)
+    {
+        const timestamps = this.#getTimestamps(stockJson);
+        const opens = this.#getOpens(stockJson);
+        const highs = this.#getHighs(stockJson);
+        const lows = this.#getLows(stockJson);
+        const closes = this.#getCloses(stockJson);
+        const volumes = this.#getVolumes(stockJson);
+        const adjCloses = this.#getAdjCloses(stockJson);
+
+        const standardData = new Map();
+        
+        // Create empty spaces for optional values
+        const blank = [];
+        if (this.includeDividends)
+            blank.push("");
+        if (this.includeStockSplits)
+            blank.push("");
+
+        for (let i = 0; i < timestamps.length; i++)
+            {
+                standardData.set(timestamps[i], [opens[i], highs[i], lows[i], closes[i]
+                    , adjCloses[i], volumes[i]].concat(blank));
+            }
+
+        return standardData;
+    }
+
+    /*
         Parses the dividend array from the stock JSON.
 
         @param stockJSON JSON of stock data
@@ -185,14 +259,14 @@ class YahooFinanceAPI
     #getDividends(stockJson)
     {
         let dividends;
+        const output = [];
         // If not undefined assigned
         if (stockJson.chart.result[0].events !== undefined 
             && stockJson.chart.result[0].events.dividends !== undefined)
             dividends = stockJson.chart.result[0].events.dividends;
         else
-            return [];
+            return output;
 
-        const output = [];
         for (const div in dividends)
         {
             // Bracket notation has to be used to use variable "div" to access JSON data [1].
@@ -201,8 +275,8 @@ class YahooFinanceAPI
             // [1] https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/Basics
             // [2] https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/JSON
             const time = stockJson.chart.result[0].events.dividends[div].date;
-            let amount = stockJson.chart.result[0].events.dividends[div].amount;
-            amount = amount.toString() + " Dividend";
+            const amount = stockJson.chart.result[0].events.dividends[div].amount;
+
             output.push([time, amount]);
         }
 
@@ -218,20 +292,106 @@ class YahooFinanceAPI
     #getSplits(stockJson)
     {
         let splits;
+        const output = [];
 
         if (stockJson.chart.result[0].events !== undefined 
             && stockJson.chart.result[0].events.splits !== undefined)
             splits = stockJson.chart.result[0].events.splits;
         else
-            return [];
+            return output;
 
-        const output = [];
         for (const split in splits)
         {
             const time = stockJson.chart.result[0].events.splits[split].date;
             let splitRatio = stockJson.chart.result[0].events.splits[split].splitRatio;
-            splitRatio = splitRatio + " Stock Splits";
+            
+            // Added the single quotes because excel will convert the ratio into a time value
+            // It does have an effect of showing the data as '2:1' in Excel
+            // In Google Sheets it will show as 2:1', but the cell will have '2:1'
+            splitRatio = "\'" + splitRatio + "\'";
+            
             output.push([time, splitRatio]);
+        }
+
+        return output;
+    }
+
+    /*
+        Combines the optional data (dividends and stock splits) into the Map object
+        that holds the standard stock data.
+
+        @param stockJSON JSON of stock data
+        @return Map object updated with optional data
+    */
+    #combineData(stockJson)
+    {
+        // Blank template if optional data has no standard data to attach to
+        const blankVals = ["", "", "", "", "", ""];
+
+        // Keep track of where to push optional data
+        let arrPtr = blankVals.length - 1;
+
+        // If there are optional columns we need to include them 
+        if (this.includeDividends)
+            blankVals.push("");
+        if (this.includeStockSplits)
+            blankVals.push("");
+
+        const output = this.#createStandardDataHashMap(stockJson);
+
+        // Helper function to parse through the array of optional data
+        // and add it to the main Map of stock data.
+        // @param arr array containing the dividends or stock splits
+        function addOptionalData(arr)
+        {
+            for (const element of arr)
+            {
+                const time = element[0];
+                const data = element[1];
+
+                // We need to make a DEEP COPY [1]
+                // Source: 
+                // [1] https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#copy_an_array
+                const tempArr = output.has(time) ? output.get(time) : 
+                                JSON.parse(JSON.stringify(blankVals));
+                tempArr[arrPtr] = data;
+
+                // Belongs to outer scope!!!!
+                output.set(time, tempArr);
+            }
+        }
+
+        if (this.includeDividends)
+        {
+            arrPtr += 1;
+            addOptionalData(this.#getDividends(stockJson));
+        }
+
+        if (this.includeStockSplits)
+        {
+            arrPtr += 1;
+            addOptionalData(this.#getSplits(stockJson));
+        }
+
+        return output;
+    }
+
+    /*
+        Converts a Map object into an array.
+
+        @param dataHashMap Map object of stock data
+        @return array of arrays of stock data with timestamp being the first element 
+                of each sub array
+    */
+    #convertDataHashMapToArray(dataHashMap)
+    {
+        const output = [];
+
+        for (const keyVal of dataHashMap)
+        {
+            const time = [keyVal[0]];
+            const data = keyVal[1];
+            output.push(time.concat(data));
         }
 
         return output;
@@ -245,28 +405,8 @@ class YahooFinanceAPI
     */
     compileData(stockJson)
     {
-        const timestamps = this.#getTimestamps(stockJson);
-        const opens = this.#getOpens(stockJson);
-        const highs = this.#getHighs(stockJson);
-        const lows = this.#getLows(stockJson);
-        const closes = this.#getCloses(stockJson);
-        const volumes = this.#getVolumes(stockJson);
-        const adjCloses = this.#getAdjCloses(stockJson);
-
-        const dividends = this.#getDividends(stockJson);
-        const splits = this.#getSplits(stockJson);
-
-        let compiledData = [];
-
-
-        for (let i = 0; i < timestamps.length; i++)
-        {
-            compiledData.push([timestamps[i], opens[i], highs[i], lows[i], closes[i]
-                , adjCloses[i], volumes[i]]);
-        }
-
-        compiledData = compiledData.concat(dividends);
-        compiledData = compiledData.concat(splits);
+        let compiledData = this.#combineData(stockJson);
+        compiledData = this.#convertDataHashMapToArray(compiledData);
 
         // You have to customize sort function to handle complex arrays [1].
         // Source:
@@ -279,7 +419,7 @@ class YahooFinanceAPI
         }
 
         // See if start and end defined as not null
-        if (this.startDate)
+        if (this.startDate && this.endDate)
         {
             let ptrStart = 0;
             let ptrEnd = compiledData.length - 1;
@@ -297,8 +437,8 @@ class YahooFinanceAPI
 
             compiledData = compiledData.slice(ptrStart, ptrEnd + 1);
         }       
-        console.log(JSON.parse(JSON.stringify(compiledData)));
-        console.log(JSON.parse(JSON.stringify(this.#addHeaders(compiledData))));
+        
+        this.#addHeaders(compiledData);
         return compiledData;
     }
 
@@ -319,6 +459,12 @@ class YahooFinanceAPI
             "Adj Close",
             "Volume"
         ];
+
+        if (this.includeDividends)
+            headers.push("Dividends");
+
+        if (this.includeStockSplits)
+            headers.push("Stock Splits");
 
         data.splice(0, 0, headers);
 
