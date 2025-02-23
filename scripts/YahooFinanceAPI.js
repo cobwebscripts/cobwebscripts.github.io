@@ -29,6 +29,7 @@
         are different.
     [*] Maybe change compileData() and compiledData to 
         prepareData() and preparedData, respectively.
+    [*] Create my own CORS proxy to mitigate data tampering risks.
     ~~~~~
 */
 
