@@ -101,7 +101,16 @@ class YahooFinanceAPI
         const response = await fetch(corsBypassUrl);
         const stockJson = await response.json(); 
 
-        return stockJson;
+        if (stockJson.chart.result != null)
+            return stockJson;
+        else 
+        {
+            // Currently Yahoo Finance gives error messages in this 
+            // JSON format
+            const errorCode = stockJson.chart.error.code;
+            const errorDescription = stockJson.chart.error.description;
+            throw new Error(`Error: ${errorCode} - ${errorDescription}.`);
+        }
     }
 
     /*

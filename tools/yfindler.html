@@ -23,19 +23,84 @@
         <p>
             Yahoo Finance provides stock data across thousands of tickers, but access to the data is not consistent. Originally this was a Python script, but I realized I could pinpoint the way I am accessing the data to create a client-side script so that people would not need to worry about installing Python and running code.
         </p>
+
+        <h3>How to Use</h3>
         <p>
-            The script does not currently have a repository of valid tickers in Yahoo Finance, so it may result in failed downloads if an invalid ticker is entered. Unfortunately, Yahoo Finance API was publicly shutdown 2017, but its underpinnings continue to function, which this script targets. If all data is entered correctly, it should initiate a download in a new tab for a csv file containing the desired information. If incorrect data is entered (invalid tickers, dates, etc.), it will simply fail to load. Certain tickers have symbols and you MUST include these symbols. For example, Yahoo Finance lists the SP500 ticker as "^GSPC" in their system, and thus you need to include the caret (^) symbol to download its data.
+            The script does not currently have a repository 
+            of valid tickers in Yahoo Finance, so it may result 
+            in failed downloads if an invalid ticker is entered. 
+            Unfortunately, Yahoo Finance API was publicly shutdown 2017, 
+            but its underpinnings continue to function, which this script targets. 
+            If all data is entered correctly, it should initiate a download in 
+            a new tab for a csv file containing the desired information. 
+            If incorrect data is entered (invalid tickers, dates, etc.), 
+            it will ATTEMPT to notify you of the failure, but some failures
+            may result in the program quietly failing. 
+            Certain tickers have symbols and you MUST include these symbols. 
+            For example, Yahoo Finance lists the SP500 ticker as "^GSPC" in 
+            their system, and thus you need to include the caret (^) symbol 
+            to download its data.
+        </p>
+        <p>
+            For the multiple download option, separate all tickers with 
+            either a space or a newline.
+            You can mix and match newline and spaces but make sure there
+            is only ONE of them separating each ticker.
+            The final result of the multiple download option 
+            will be a zip file of csv files.
+        </p>
+
+        <h3>Acknowledgements and Notes</h3>
+        <p>
+            Special thanks to pwasystem, for whom without their 
+            elegant and small client-side zipping solution, this would not 
+            be possible.
+            The GitHub to the pwasystem's repository can be found 
+            here: 
+            <a href="https://github.com/pwasystem/zip">https://github.com/pwasystem/zip</a>.
+        </p>
+
+        <p>
+            If you like this kind of stuff, please consider following one 
+            of my contacts on my 
+            <a href="/about.html">About page</a>.
+            I enjoy hearing from people, and it gives me an avenue to 
+            speak with all of you and hear about any issues you may across.
+            Thank you and hope this helps!
         </p>
         <form>
             <fieldset>
                 <legend>Yahoo Finance Downloader</legend>
                 <fieldset>
+                    <legend>Download Type</legend>
+                    <label for="downloadType1">
+                        <input type="radio" id="downloadType1" name="downloadType" value="single" checked>
+                        Single File
+                    </label>
+                    <label for="downloadType2">
+                        <input type="radio" id="downloadType2" name="downloadType" value="multi">
+                        Multiple Files, zipped
+                    </label>
+                </fieldset>
+                <!--
+                    Two fields based on single vs multi
+                -->
+                <fieldset id="form1Single">
                     <legend>Ticker</legend>
                     <label for="ticker">
                         Yahoo Finance stock ticker:
                         <input type="text" name="ticker" id="ticker">
                     </label>
                 </fieldset>
+
+                <fieldset id="form2Multi" hidden>
+                    <legend>Ticker(s)</legend>
+                    <label for="tickers">
+                        Yahoo Finance stock ticker(s):
+                        <textarea name="tickers" id="tickers" rows="3" cols="80"></textarea>
+                    </label>
+                </fieldset>
+
                 <fieldset>
                     <legend>Date Selection</legend>                    
                     <label for="dateRangeChoice1">
@@ -98,5 +163,10 @@
                 <button type="button" id="btnReset">Reset</button>
             </fieldset>
         </form>
+
+        <h3 id="progress">Progress: 0/0</h3>
+
+        <h3>Failed Downloads:</h3>
+        <p id="failedList"></p>
     </body>
 </html>
