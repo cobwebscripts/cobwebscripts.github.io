@@ -97,7 +97,8 @@ class YahooFinanceAPI
     */
     async retrieveJson()
     {
-        const corsBypassUrl = 'https://corsproxy.io/?' + encodeURIComponent(this.#createUrl());
+        const corsHost = "https://corsproxy.io/?";
+        const corsBypassUrl = corsHost + encodeURIComponent(this.#createUrl());
         const response = await fetch(corsBypassUrl);
         const stockJson = await response.json(); 
 
@@ -125,7 +126,7 @@ class YahooFinanceAPI
             + this.ticker
             + "?range=1000y&interval="
             + this.timeResolution
-            + "&includePrePost=true&events=div%7Csplit%7Cearn";
+            + "&includePrePost=true&events=div|split|earn";
     }
 
     /*
