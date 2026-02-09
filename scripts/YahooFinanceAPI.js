@@ -97,7 +97,7 @@ class YahooFinanceAPI
     */
     async retrieveJson()
     {
-        const corsHost = "https://corsproxy.io/?";
+        const corsHost = "http://64.23.229.207:8080/yahoo_finance?stock_url=";
         const corsBypassUrl = corsHost + encodeURIComponent(this.#createUrl());
         const response = await fetch(corsBypassUrl);
         const stockJson = await response.json(); 
