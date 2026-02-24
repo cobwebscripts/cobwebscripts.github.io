@@ -150,6 +150,17 @@ class YahooFinanceAPI
     }
 
     /*
+        Parses the gmtoffset from the stock JSON.
+
+        @param stockJson JSON of stock data
+        @return gmtoffset
+    */
+    #getGMTOffset(stockJson)
+    {
+        return stockJson.chart.result[0].meta.gmtoffset;
+    }
+
+    /*
         Parses the timestamp array from the stock JSON.
 
         @param stockJson JSON of stock data
@@ -423,10 +434,20 @@ class YahooFinanceAPI
         // Source:
         // [1] https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort
         compiledData.sort((a, b) => a[0] - b[0]);
-
+        
+        // Convert the timestamp in seconds to yyyy-mm-dd
+        const oneHourInSeconds = 3600;
+        const offset = this.#getGMTOffset(stockJson);
         for (let i = 0; i < compiledData.length; i++)
         {
-            compiledData[i][0] = this.#secondsToDate(compiledData[i][0]);
+            // We add the extra hour to so we will always be in the 
+            // new day regardless of daylight savings.
+            // We have to do this because Yahoo only sends the current 
+            // time zone, 
+            // but time zones are timestamped to the offset of when 
+            // they occurred.
+            const offsetTime = compiledData[i][0] + offset + oneHourInSeconds;
+            compiledData[i][0] = this.#secondsToDate(offsetTime);
         }
 
         // See if start and end defined as not null
