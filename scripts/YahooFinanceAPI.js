@@ -20,16 +20,17 @@
     ~~~~~
     TODO
     ~~~~~
-    [*] Correct timing in compileData() so it mirrors Yahoo Finance page.
-        This is an issue for the 1wk and 1mo resolutions.
-    [*] Catch errors from Yahoo Finance and throw them up.
-    [*] Refactor for better separation of concerns.
     [*] combineData() has an issue on 1wk and 1mo resolutions.
         Even though they are the same date, they get separated because the milliseconds 
         are different.
+        [*] March 01, 2026: The above is an old comment, 
+            so I can't remember exactly what is getting separated, 
+            but based on the combineData() function, 
+            I believe it means the dividends and splits are being 
+            sent to a separate line when technically they hapened
+            on the same day.
     [*] Maybe change compileData() and compiledData to 
         prepareData() and preparedData, respectively.
-    [*] Create my own CORS proxy to mitigate data tampering risks.
     ~~~~~
 */
 
@@ -147,6 +148,17 @@ class YahooFinanceAPI
             + date.getUTCDate();
 
         return stringDate;
+    }
+
+    /*
+        Parses the gmtoffset from the stock JSON.
+
+        @param stockJson JSON of stock data
+        @return gmtoffset
+    */
+    #getGMTOffset(stockJson)
+    {
+        return stockJson.chart.result[0].meta.gmtoffset;
     }
 
     /*
@@ -423,10 +435,20 @@ class YahooFinanceAPI
         // Source:
         // [1] https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort
         compiledData.sort((a, b) => a[0] - b[0]);
-
+        
+        // Convert the timestamp in seconds to yyyy-mm-dd
+        const oneHourInSeconds = 3600;
+        const offset = this.#getGMTOffset(stockJson);
         for (let i = 0; i < compiledData.length; i++)
         {
-            compiledData[i][0] = this.#secondsToDate(compiledData[i][0]);
+            // We add the extra hour to so we will always be in the 
+            // new day regardless of daylight savings.
+            // We have to do this because Yahoo only sends the current 
+            // time zone, 
+            // but time zones are timestamped to the offset of when 
+            // they occurred.
+            const offsetTime = compiledData[i][0] + offset + oneHourInSeconds;
+            compiledData[i][0] = this.#secondsToDate(offsetTime);
         }
 
         // See if start and end defined as not null
