@@ -20,16 +20,17 @@
     ~~~~~
     TODO
     ~~~~~
-    [*] Correct timing in compileData() so it mirrors Yahoo Finance page.
-        This is an issue for the 1wk and 1mo resolutions.
-    [*] Catch errors from Yahoo Finance and throw them up.
-    [*] Refactor for better separation of concerns.
     [*] combineData() has an issue on 1wk and 1mo resolutions.
         Even though they are the same date, they get separated because the milliseconds 
         are different.
+        [*] March 01, 2026: The above is an old comment, 
+            so I can't remember exactly what is getting separated, 
+            but based on the combineData() function, 
+            I believe it means the dividends and splits are being 
+            sent to a separate line when technically they hapened
+            on the same day.
     [*] Maybe change compileData() and compiledData to 
         prepareData() and preparedData, respectively.
-    [*] Create my own CORS proxy to mitigate data tampering risks.
     ~~~~~
 */
 
